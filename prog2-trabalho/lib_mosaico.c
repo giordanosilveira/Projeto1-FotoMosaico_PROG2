@@ -290,6 +290,7 @@ t_pixel * media_bloco (t_pixel ** pixels, int largura, int altura, int ini_lin, 
     soma_green = 0;
     soma_blue = 0;
 
+    //fprintf (stderr, "%d %d %d %d\n", largura, altura, ini_lin, ini_col);
     //Bloco: percorre a matriz de pixels e soma os componentes RGB
     for (int i = ini_lin; i < altura; i++) {
         for (int j = ini_col; j < largura; j++) {
@@ -301,10 +302,11 @@ t_pixel * media_bloco (t_pixel ** pixels, int largura, int altura, int ini_lin, 
     }                                                                   //Fim do bloco                                                                    
 
     //Bloco: calcula a média das somas dos componentes 
-    media->red = soma_red/(largura*altura);
-    media->green = soma_green/(largura*altura);
-    media->blue = soma_blue/(largura*altura);                         //Fim do bloco
+    media->red = soma_red/((largura - ini_col)*(altura - ini_lin));
+    media->green = soma_green/((largura - ini_col)*(altura - ini_lin));
+    media->blue = soma_blue/((largura - ini_col)*(altura - ini_lin));   //Fim do bloco
 
+    //fprintf (stderr, "%d %d %d\n", media->red, media->green, media->blue);
     return media;
     
 }
@@ -315,33 +317,30 @@ void fotomosaico (t_tiles* pastilhas, t_imagem * entradappm, t_imagem * saidappm
     for (int i = 0; i < entradappm->altura; i += pastilhas->vetor[0]->altura) {
         for (int j = 0; j < entradappm->largura; j += pastilhas->vetor[0]->largura) {
             if ((i + pastilhas->vetor[0]->altura > entradappm->altura) && (j + pastilhas->vetor[0]->largura > entradappm->largura)) {
-                saidappm->cor_media_bloco = media_bloco ( saidappm->matriz_pixels, entradappm->largura, entradappm->altura, i, j);
-                fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
+                saidappm->cor_media_bloco = media_bloco ( entradappm->matriz_pixels, entradappm->largura, entradappm->altura, i, j);
+                //fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, entradappm->altura, entradappm->largura);
-                free (saidappm->cor_media_bloco);
             }
             else if (j + pastilhas->vetor[0]->largura > entradappm->largura) {
-                saidappm->cor_media_bloco = media_bloco ( saidappm->matriz_pixels, entradappm->largura, i + pastilhas->vetor[0]->altura, i, j);
-                fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
+                saidappm->cor_media_bloco = media_bloco ( entradappm->matriz_pixels, entradappm->largura, i + pastilhas->vetor[0]->altura, i, j);
+                //fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, i + pastilhas->vetor[0]->altura, entradappm->largura);
-                free (saidappm->cor_media_bloco);
             }
             else if (i + pastilhas->vetor[0]->altura > entradappm->altura) {
-                saidappm->cor_media_bloco = media_bloco ( saidappm->matriz_pixels, j + pastilhas->vetor[0]->largura, entradappm->altura, i, j);
-                fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
+                saidappm->cor_media_bloco = media_bloco ( entradappm->matriz_pixels, j + pastilhas->vetor[0]->largura, entradappm->altura, i, j);
+                //fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, entradappm->altura, j + pastilhas->vetor[0]->largura);
-                free (saidappm->cor_media_bloco);
             }
             else {
-                saidappm->cor_media_bloco = media_bloco ( saidappm->matriz_pixels, j + pastilhas->vetor[0]->largura, i + pastilhas->vetor[0]->altura, i, j);
-                fprintf (stderr, "%d %d %d\n",saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
+                saidappm->cor_media_bloco = media_bloco ( entradappm->matriz_pixels, j + pastilhas->vetor[0]->largura, i + pastilhas->vetor[0]->altura, i, j);
+                //fprintf (stderr, "%d %d %d\n",saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, i + pastilhas->vetor[0]->altura, j + pastilhas->vetor[0]->largura);
-                free (saidappm->cor_media_bloco);
             }
+            free (saidappm->cor_media_bloco);
         }
     }
 
@@ -437,7 +436,7 @@ void escrever_imagem (t_imagem * imagem_saida, char *nome_saida) {
 void liberando_pastilhas (t_tiles * pastilhas) {
 
     int i;
-    for (i = pastilhas->size; i >= ZERO; i--) {
+    for (i = pastilhas->size - 1; i >= ZERO; i--) {
         free (pastilhas->vetor[i]->cor_media_bloco);
         free (pastilhas->vetor[i]->nome_imagem);
         free (pastilhas->vetor[i]->matriz_pixels[0]);
@@ -445,13 +444,12 @@ void liberando_pastilhas (t_tiles * pastilhas) {
     }
     for (int i = 0; i < pastilhas->size; i++)
         free (pastilhas->vetor[i]);
+    
     free (pastilhas->vetor);
-
     free (pastilhas);
-    //free (pastilhas->vetor);
-    //free (pastilhas);
 
 }
+
 void liberando_string (char *string) {
 
     free (string);

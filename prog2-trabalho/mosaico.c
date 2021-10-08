@@ -79,6 +79,7 @@ int main (int argc, char *argv[]) {
     //Abrindo a imagem principal
     imputppm = inicializa_tipo_imagem (1);
     ler_imagens(imputppm, nome_entrada);
+    //um_monte_de_print_besta (imputppm->matriz_pixels);
     fprintf (stderr, "Reading imput image\n");
     fprintf (stderr, "Imput image is PPM %s, %dx%d pixels\n", imputppm->tipo, imputppm->largura, imputppm->altura);
 
@@ -97,10 +98,10 @@ int main (int argc, char *argv[]) {
     fprintf (stderr, "freeing memory spaces\n");
     //liberando_imagem ();
     //liberando_imagem ();
-    //liberando_pastilhas (pastilhas);
-    liberando_string (nome_entrada);
-    liberando_string (nome_saida);
-    liberando_string (nome_diretorio);
+    liberando_pastilhas (pastilhas);
+    //liberando_string (nome_entrada);
+    //liberando_string (nome_saida);
+    //liberando_string (nome_diretorio);
 
    return 0;
 }

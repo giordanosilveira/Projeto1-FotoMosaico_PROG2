@@ -5,6 +5,7 @@
 #define __LBM__
 
 #include <stdio.h>
+
 #define LARGURA_MAX 1024
 #define ZERO 0
 #define MAX_TYPE 2
