@@ -316,24 +316,28 @@ void fotomosaico (t_tiles* pastilhas, t_imagem * entradappm, t_imagem * saidappm
         for (int j = 0; j < entradappm->largura; j += pastilhas->vetor[0]->largura) {
             if ((i + pastilhas->vetor[0]->altura > entradappm->altura) && (j + pastilhas->vetor[0]->largura > entradappm->largura)) {
                 saidappm->cor_media_bloco = media_bloco ( saidappm->matriz_pixels, entradappm->largura, entradappm->altura, i, j);
+                fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, entradappm->altura, entradappm->largura);
                 free (saidappm->cor_media_bloco);
             }
             else if (j + pastilhas->vetor[0]->largura > entradappm->largura) {
                 saidappm->cor_media_bloco = media_bloco ( saidappm->matriz_pixels, entradappm->largura, i + pastilhas->vetor[0]->altura, i, j);
+                fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, i + pastilhas->vetor[0]->altura, entradappm->largura);
                 free (saidappm->cor_media_bloco);
             }
             else if (i + pastilhas->vetor[0]->altura > entradappm->altura) {
                 saidappm->cor_media_bloco = media_bloco ( saidappm->matriz_pixels, j + pastilhas->vetor[0]->largura, entradappm->altura, i, j);
+                fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, entradappm->altura, j + pastilhas->vetor[0]->largura);
                 free (saidappm->cor_media_bloco);
             }
             else {
                 saidappm->cor_media_bloco = media_bloco ( saidappm->matriz_pixels, j + pastilhas->vetor[0]->largura, i + pastilhas->vetor[0]->altura, i, j);
+                fprintf (stderr, "%d %d %d\n",saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, i + pastilhas->vetor[0]->altura, j + pastilhas->vetor[0]->largura);
                 free (saidappm->cor_media_bloco);
@@ -351,7 +355,8 @@ int compara_blocos (t_tiles *pastilhas, t_pixel * media_bloco) {
     delta_r = pastilhas->vetor[0]->cor_media_bloco->red - media_bloco->red;
     delta_g = pastilhas->vetor[0]->cor_media_bloco->green - media_bloco->green;   
     delta_b = pastilhas->vetor[0]->cor_media_bloco->blue - media_bloco->blue;
-
+    //fprintf (stderr, "%f %f %f\n", delta_r, delta_g, delta_b );
+    
     ind_menor = 0;
     media_r = (pastilhas->vetor[0]->cor_media_bloco->red + media_bloco->red)/2;
     deltaC_menor = sqrt((2 + media_r/(RGB + 1)) * pow(delta_r,2) + 4*pow(delta_g,2) + (2 + (RGB - media_r)/(RGB + 1)) * pow(delta_b,2));
@@ -379,7 +384,7 @@ int compara_blocos (t_tiles *pastilhas, t_pixel * media_bloco) {
         }
     }
 
-    fprintf (stderr, "%d\n", ind_menor);
+    //fprintf (stderr, "%d\n", ind_menor);
     return ind_menor;
 
 }
