@@ -70,28 +70,28 @@ int main (int argc, char *argv[]) {
     fprintf (stderr, "Tile size is %dx%d\n", pastilhas->vetor[0]->largura, pastilhas->vetor[0]->altura);
 
     //Calculando as cores médias de cada bloco
+    fprintf (stderr, "Calculating tiles' aberage colors\n");
     for (int i = 0; i < pastilhas->size; i++) {
         pastilhas->vetor[i]->cor_media_bloco = media_bloco (pastilhas->vetor[i]->matriz_pixels, pastilhas->vetor[i]->largura, pastilhas->vetor[i]->altura, ZERO, ZERO);
         //fprintf (stderr, "%d %d %d\n", pastilhas->vetor[i]->cor_media_bloco->red, pastilhas->vetor[i]->cor_media_bloco->green, pastilhas->vetor[i]->cor_media_bloco->blue );
     }
-    fprintf (stderr, "Calculating tiles' aberage colors\n");
     
     //Abrindo a imagem principal
+    fprintf (stderr, "Reading imput image\n");
     imputppm = inicializa_tipo_imagem (1);
     ler_imagens(imputppm, nome_entrada);
     //um_monte_de_print_besta (imputppm->matriz_pixels);
-    fprintf (stderr, "Reading imput image\n");
     fprintf (stderr, "Imput image is PPM %s, %dx%d pixels\n", imputppm->tipo, imputppm->largura, imputppm->altura);
 
 
     //Tratando da imagem de saída
+    fprintf (stderr, "Building mosaic image\n");
     outputppm = inicializa_tipo_imagem (1);
     fotomosaico (pastilhas, imputppm, outputppm);
-    fprintf (stderr, "Building mosaic image\n");
 
     //Escrevendo a imagem de saída
-    escrever_imagem (outputppm, nome_saida);
     fprintf (stderr, "Writing output file\n");
+    escrever_imagem (outputppm, nome_saida);
 
 
     //Dando Free nas estruturas usadas

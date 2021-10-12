@@ -149,12 +149,13 @@ void carrega_pixels (FILE *arquivo, t_pixel **pixels, char *tipo, int largura, i
 
     //Bloco: Se a imagem for P6 carrega tudo na memória com fread
     else {
-        //Carrega em pixels[0], 3 * largura, altura vezes
-        if ( fread (pixels[0], 3 * largura, altura, arquivo) != altura) {
-            perror ("Error:");
-            fprintf (stderr, "Não foi possivel ler os pixels da imagem P6\n");
-            exit (1);
-         }                                                           //Fim do bloco
+        for (int i = 0; i < altura; i++) {
+            for (int j = 0; j < largura; j++) {
+                fread (&pixels[i][j].red, 1, 1, arquivo);
+                fread (&pixels[i][j].green, 1, 1, arquivo);
+                fread (&pixels[i][j].blue, 1, 1, arquivo);
+            }
+        }                                                           //Fim do bloco
     }
 }
 void tratando_comentarios (FILE *arquivo){
@@ -276,7 +277,6 @@ t_tiles * abrir_pastilhas (char *nome_diretorio) {
    }
 
    (void) closedir (dir);
-   //fprintf (stderr, "Tile size is %dx%d\n", pastilhas->vetor[0].altura, pastilhas->vetor[0].largura);
    return pastilhas;
 
 }
@@ -306,7 +306,6 @@ t_pixel * media_bloco (t_pixel ** pixels, int largura, int altura, int ini_lin, 
     media->green = soma_green/((largura - ini_col)*(altura - ini_lin));
     media->blue = soma_blue/((largura - ini_col)*(altura - ini_lin));   //Fim do bloco
 
-    //fprintf (stderr, "%d %d %d\n", media->red, media->green, media->blue);
     return media;
     
 }
@@ -318,25 +317,21 @@ void fotomosaico (t_tiles* pastilhas, t_imagem * entradappm, t_imagem * saidappm
         for (int j = 0; j < entradappm->largura; j += pastilhas->vetor[0]->largura) {
             if ((i + pastilhas->vetor[0]->altura > entradappm->altura) && (j + pastilhas->vetor[0]->largura > entradappm->largura)) {
                 saidappm->cor_media_bloco = media_bloco ( entradappm->matriz_pixels, entradappm->largura, entradappm->altura, i, j);
-                //fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, entradappm->altura, entradappm->largura);
             }
             else if (j + pastilhas->vetor[0]->largura > entradappm->largura) {
                 saidappm->cor_media_bloco = media_bloco ( entradappm->matriz_pixels, entradappm->largura, i + pastilhas->vetor[0]->altura, i, j);
-                //fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, i + pastilhas->vetor[0]->altura, entradappm->largura);
             }
             else if (i + pastilhas->vetor[0]->altura > entradappm->altura) {
                 saidappm->cor_media_bloco = media_bloco ( entradappm->matriz_pixels, j + pastilhas->vetor[0]->largura, entradappm->altura, i, j);
-                //fprintf (stderr, "%d %d %d\n", saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, entradappm->altura, j + pastilhas->vetor[0]->largura);
             }
             else {
                 saidappm->cor_media_bloco = media_bloco ( entradappm->matriz_pixels, j + pastilhas->vetor[0]->largura, i + pastilhas->vetor[0]->altura, i, j);
-                //fprintf (stderr, "%d %d %d\n",saidappm->cor_media_bloco->red, saidappm->cor_media_bloco->green, saidappm->cor_media_bloco->blue);
                 pos_menor = compara_blocos (pastilhas, saidappm->cor_media_bloco);
                 substitui_bloco (pastilhas->vetor[pos_menor]->matriz_pixels, saidappm->matriz_pixels, i, j, i + pastilhas->vetor[0]->altura, j + pastilhas->vetor[0]->largura);
             }
@@ -354,7 +349,6 @@ int compara_blocos (t_tiles *pastilhas, t_pixel * media_bloco) {
     delta_r = pastilhas->vetor[0]->cor_media_bloco->red - media_bloco->red;
     delta_g = pastilhas->vetor[0]->cor_media_bloco->green - media_bloco->green;   
     delta_b = pastilhas->vetor[0]->cor_media_bloco->blue - media_bloco->blue;
-    //fprintf (stderr, "%f %f %f\n", delta_r, delta_g, delta_b );
     
     ind_menor = 0;
     media_r = (pastilhas->vetor[0]->cor_media_bloco->red + media_bloco->red)/2;
@@ -369,21 +363,18 @@ int compara_blocos (t_tiles *pastilhas, t_pixel * media_bloco) {
         delta_g = pastilhas->vetor[i]->cor_media_bloco->green - media_bloco->green;   
         delta_b = pastilhas->vetor[i]->cor_media_bloco->blue - media_bloco->blue;
 
-        //fprintf (stderr, "%f %f %f\n", delta_r, delta_g, delta_b );
         media_r = (pastilhas->vetor[i]->cor_media_bloco->red + media_bloco->red)/2;
         deltaC = sqrt((2 + media_r/(RGB + 1)) * pow(delta_r,2) + 4*pow(delta_g,2) + (2 + (RGB - media_r)/(RGB + 1)) * pow(delta_b,2));
 
         if (deltaC < 0)
             deltaC = deltaC * -1;
 
-        //fprintf (stderr, "%f %f\n", deltaC, deltaC_menor);
         if (deltaC < deltaC_menor) {
             deltaC_menor = deltaC;
             ind_menor = i;
         }
     }
 
-    //fprintf (stderr, "%d\n", ind_menor);
     return ind_menor;
 
 }
@@ -418,12 +409,20 @@ void escrever_imagem (t_imagem * imagem_saida, char *nome_saida) {
     fprintf (arquivo, "# Autor: Giordano Henrique Silveira\n");
     fprintf (arquivo, "# Não copia comédia\n");
     fprintf (arquivo, "%d %d\n", imagem_saida->largura, imagem_saida->altura);
-    fprintf (arquivo, "%d\n", imagem_saida->componente_rgb);            //Fim do bloco
+    //fprintf (arquivo, "%d\n", imagem_saida->componente_rgb);            //Fim do bloco
 
     if ( ! strcmp (imagem_saida->tipo, "P6")) {
-        fwrite (imagem_saida->matriz_pixels[0], 3 * imagem_saida->largura, imagem_saida->altura, arquivo);
+        fprintf (arquivo, "%d", imagem_saida->componente_rgb);
+        for (int i = 0; i < imagem_saida->altura; i++){
+            for (int j = 0; j < imagem_saida->largura; j++) {
+                fwrite (&imagem_saida->matriz_pixels[i][j].red, 1, 1, arquivo);
+                fwrite (&imagem_saida->matriz_pixels[i][j].green, 1, 1, arquivo);
+                fwrite (&imagem_saida->matriz_pixels[i][j].blue, 1, 1, arquivo);
+            }
+        }
     }
     else {
+        fprintf (arquivo, "%d\n", imagem_saida->componente_rgb);
         for (int i = 0; i < imagem_saida->altura; i++) {
             for (int j = 0; j < imagem_saida->largura; j++) {
                 fprintf (arquivo, "%d %d %d ", imagem_saida->matriz_pixels[i][j].red, imagem_saida->matriz_pixels[i][j].green, imagem_saida->matriz_pixels[i][j].blue);
