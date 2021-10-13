@@ -66,6 +66,8 @@ int main (int argc, char *argv[]) {
     fprintf (stderr, "Reading tiles from %s\n", nome_diretorio);
     pastilhas = abrir_pastilhas (nome_diretorio);
 
+    //max_pastilhas (pastilhas);
+
     fprintf (stderr, "%d tiles read\n", pastilhas->size);    
     fprintf (stderr, "Tile size is %dx%d\n", pastilhas->vetor[0]->largura, pastilhas->vetor[0]->altura);
 
@@ -91,7 +93,7 @@ int main (int argc, char *argv[]) {
 
     //Escrevendo a imagem de saída
     fprintf (stderr, "Writing output file\n");
-    escrever_imagem (outputppm, nome_saida);
+    escrever_imagem (outputppm, nome_saida, pastilhas->vetor[0]->tipo);
 
 
     //Dando Free nas estruturas usadas

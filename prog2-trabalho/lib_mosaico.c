@@ -394,9 +394,13 @@ void substitui_bloco (t_pixel ** matriz_pastilha, t_pixel ** matriz_imagem, int 
         l++;
     }
 }
-void escrever_imagem (t_imagem * imagem_saida, char *nome_saida) {
+void escrever_imagem (t_imagem * imagem_saida, char *nome_saida, char* tipo) {
 
     FILE * arquivo;
+    int i;
+
+    i = strcmp (tipo, "P3");
+
     arquivo = fopen (nome_saida, "w");
     if (! arquivo) {
         perror ("Error:");
@@ -412,7 +416,12 @@ void escrever_imagem (t_imagem * imagem_saida, char *nome_saida) {
     //fprintf (arquivo, "%d\n", imagem_saida->componente_rgb);            //Fim do bloco
 
     if ( ! strcmp (imagem_saida->tipo, "P6")) {
-        fprintf (arquivo, "%d", imagem_saida->componente_rgb);
+        
+        if (i == 0)
+            fprintf (arquivo, "%d\n", imagem_saida->componente_rgb);
+        else
+            fprintf (arquivo, "%d", imagem_saida->componente_rgb);
+
         for (int i = 0; i < imagem_saida->altura; i++){
             for (int j = 0; j < imagem_saida->largura; j++) {
                 fwrite (&imagem_saida->matriz_pixels[i][j].red, 1, 1, arquivo);
@@ -452,5 +461,22 @@ void liberando_pastilhas (t_tiles * pastilhas) {
 void liberando_string (char *string) {
 
     free (string);
+
+}
+max_pastilhas (t_tiles *t) {
+
+    FILE * arquivo;
+    arquivo = fopen ("rgb.txt", "w");
+    if (! arquivo) {
+        perror ("aqui blayblayd");
+        exit (1);
+    }
+
+    for (int i = 0; i < t->size; i++) {
+        fprintf (arquivo, "%s\n", t->vetor[i]->tipo);
+        fprintf (arquivo, "%d\n", t->vetor[i]->componente_rgb);
+    }
+
+    fclose (arquivo);
 
 }  

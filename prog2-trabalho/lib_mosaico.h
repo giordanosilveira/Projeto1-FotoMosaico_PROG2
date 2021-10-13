@@ -90,7 +90,7 @@ void substitui_bloco (t_pixel **, t_pixel **, int , int , int , int);
 
 //Escreve o arquivo output.ppm
 //É passado os dados necessários para o arquivo
-void escrever_imagem (t_imagem *, char *);
+void escrever_imagem (t_imagem *, char *, char *);
 //Libera as strings dos nomes do arquivo
 void liberando_string (char *);
 
