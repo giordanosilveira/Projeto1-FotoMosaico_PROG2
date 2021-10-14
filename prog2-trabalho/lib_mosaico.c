@@ -133,18 +133,22 @@ void carrega_pixels (FILE *arquivo, t_pixel **pixels, char *tipo, int largura, i
             for (int j = 0; j < largura; j++){
 
                 //Bloco: lendo os pixels do arquivo e testando para ver se leu corretamente
-                if ( fscanf (arquivo, "%d %d %d", &red, &green, &blue) != COMPONENTES_RGB ) {
-                   perror ("Error:");
-                   fprintf (stderr, "Não foi possivel ler os pixels da imagem P3\n");
-                   exit (1);
-                }                                                     //Fim do bloco
+                fscanf (arquivo, "%d ", &red);
+                fscanf (arquivo, "%d ", &green);
+                fscanf (arquivo, "%d ", &blue);                         //Fim do bloco
+
+                // if ( fscanf (arquivo, "%d %d %d", &red, &green, &blue) != 3) {
+                    //perror ("Error:");
+                    //fprintf (stderr, "Não foi possivel ler os pixels da imagem P3\n");
+                    //exit (1);
+                //}                                                     
 
                 //Bloco: carregando os pixels retirados do arquivo na matriz de pixel
                 pixels[i][j].red = red;
                 pixels[i][j].green = green;
                 pixels[i][j].blue = blue;
-            }                                                         //Fim do bloco
-        }                                                             //Fim do bloco
+            }                                                           //Fim do bloco
+        }                                                               //Fim do bloco
     }
 
     //Bloco: Se a imagem for P6 carrega tudo na memória com fread
@@ -418,7 +422,7 @@ void escrever_imagem (t_imagem * imagem_saida, char *nome_saida, char* tipo) {
     if ( ! strcmp (imagem_saida->tipo, "P6")) {
         
         if (i == 0)
-            fprintf (arquivo, "%d\n", imagem_saida->componente_rgb);
+            fprintf (arquivo, "%d  \n", imagem_saida->componente_rgb);
         else
             fprintf (arquivo, "%d", imagem_saida->componente_rgb);
 
@@ -463,7 +467,7 @@ void liberando_string (char *string) {
     free (string);
 
 }
-max_pastilhas (t_tiles *t) {
+void max_pastilhas (t_tiles *t) {
 
     FILE * arquivo;
     arquivo = fopen ("rgb.txt", "w");
