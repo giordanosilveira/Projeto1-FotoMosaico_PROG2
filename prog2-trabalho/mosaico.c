@@ -73,7 +73,7 @@ int main (int argc, char *argv[]) {
 
     //Calculando as cores médias de cada bloco
     fprintf (stderr, "Calculating tiles' aberage colors\n");
-    for (int i = 0; i < pastilhas->size; i++) {
+    for (int i = 0; i < pastilhas->size; i++) 
         pastilhas->vetor[i]->cor_media_bloco = media_bloco (pastilhas->vetor[i]->matriz_pixels, pastilhas->vetor[i]->largura, pastilhas->vetor[i]->altura, ZERO, ZERO);
 
     //Abrindo a imagem principal
