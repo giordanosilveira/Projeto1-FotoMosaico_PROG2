@@ -95,12 +95,9 @@ int main (int argc, char *argv[]) {
 
     //Dando Free nas estruturas usadas
     fprintf (stderr, "freeing memory spaces\n");
-    //liberando_imagem ();
-    //liberando_imagem ();
+    liberando_imagem (imputppm);
+    liberando_imagem (outputppm);
     liberando_pastilhas (pastilhas);
-    //liberando_string (nome_entrada);
-    //liberando_string (nome_saida);
-    //liberando_string (nome_diretorio);
 
    return 0;
 }

@@ -464,23 +464,18 @@ void liberando_pastilhas (t_tiles * pastilhas) {
 
 void liberando_string (char *string) {
 
-    free (string);
+    if (string)
+        free (string);
 
 }
-void max_pastilhas (t_tiles *t) {
 
-    FILE * arquivo;
-    arquivo = fopen ("rgb.txt", "w");
-    if (! arquivo) {
-        perror ("aqui blayblayd");
-        exit (1);
-    }
+void liberando_imagem (t_imagem * imagem) {
 
-    for (int i = 0; i < t->size; i++) {
-        fprintf (arquivo, "%s\n", t->vetor[i]->tipo);
-        fprintf (arquivo, "%d\n", t->vetor[i]->componente_rgb);
-    }
+    //free (imagem->nome_imagem);
+    //free (imagem->cor_media_bloco);
+    free (imagem->matriz_pixels[0]);
+    free (imagem->matriz_pixels);
+    free (imagem);
 
-    fclose (arquivo);
-
-}  
+}
+  
