@@ -1,5 +1,3 @@
-// Giordano Henrique Silveira. GRR:20197152
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -8,21 +6,28 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "lib_mosaico.h"
+#include "libmosaico.h"
 
 int main (int argc, char *argv[]) {
 
+    DIR *diretorio;
+    t_ppm *entradappm, *saidappm;
+    t_vetor_pastilhas *vetor;
+    struct dirent *file_directory;
     char *nome_entrada, *nome_saida, *nome_diretorio;
-    t_tiles *pastilhas;
-    t_imagem * imputppm, *outputppm;
-
     int opcao;
-    int flagI = 0;
-    int flagP = 0;
-    int flagO = 0;
+    int flagI, flagP, flagO;
+    int past_lar, past_alt;
+
+
+    flagI = 0;
+    flagP = 0;
+    flagO = 0;
+
 
     opterr = 0;
 
+    //Bloco: trata das opções da linha de comando
     while ((opcao = getopt (argc, argv, "i:o:p:")) != -1){
 
         //Usuário habilita a opção -i
@@ -60,44 +65,36 @@ int main (int argc, char *argv[]) {
     if (! flagP) {
         nome_diretorio = aloca_vetor (TAM_ENTRADA);
         strcpy (nome_diretorio, "./tiles/");
+    }                                                       //Fim do bloco.
+
+    fprintf (stderr, "Abrindo o diretorio %s\n", nome_diretorio);
+    diretorio = opendir (nome_diretorio);
+    if (! diretorio) {
+        perror ("Error");
+        fprintf (stderr, "Não foi possível abrir o diretorio %s\n", nome_diretorio);
+        exit (1);
     }
 
-    //Carregarando as pastilhas da memória e calculando a cor media de cada pastilha
-    fprintf (stderr, "Reading tiles from %s\n", nome_diretorio);
-    pastilhas = abrir_pastilhas (nome_diretorio);
+    file_directory = readdir (diretorio);
 
-    //max_pastilhas (pastilhas);
+    while (! (strcmp(file_directory->d_name, ".")) || ! (strcmp(file_directory->d_name, ".."))) {
 
-    fprintf (stderr, "%d tiles read\n", pastilhas->size);    
-    fprintf (stderr, "Tile size is %dx%d\n", pastilhas->vetor[0]->largura, pastilhas->vetor[0]->altura);
+        if ( ! (file_directory = readdir (diretorio))) {
+            perror ("Error");
+            fprintf (stderr, "Existe apenas o diretório corrente e o diretório anterior nesta pasta\n");
+            exit (1);
+        }
 
-    //Calculando as cores médias de cada bloco
-    fprintf (stderr, "Calculating tiles' aberage colors\n");
-    for (int i = 0; i < pastilhas->size; i++) 
-        pastilhas->vetor[i]->cor_media_bloco = media_bloco (pastilhas->vetor[i]->matriz_pixels, pastilhas->vetor[i]->largura, pastilhas->vetor[i]->altura, ZERO, ZERO);
+    }
 
-    //Abrindo a imagem principal
-    fprintf (stderr, "Reading imput image\n");
-    imputppm = inicializa_tipo_imagem (1);
-    ler_imagens(imputppm, nome_entrada);
-    //um_monte_de_print_besta (imputppm->matriz_pixels);
-    fprintf (stderr, "Imput image is PPM %s, %dx%d pixels\n", imputppm->tipo, imputppm->largura, imputppm->altura);
+    padrao_pastilhas (file_directory, nome_diretorio, &past_lar, &past_alt);
+    rewinddir (diretorio);
 
-    //Tratando da imagem de saída
-    fprintf (stderr, "Building mosaic image\n");
-    outputppm = inicializa_tipo_imagem (1);
-    fotomosaico (pastilhas, imputppm, outputppm);
+    vetor = abrir_pastilhas (diretorio, file_directory, nome_diretorio, past_lar, past_alt);
 
-    //Escrevendo a imagem de saída
-    fprintf (stderr, "Writing output file\n");
-    escrever_imagem (outputppm, nome_saida, pastilhas->vetor[0]->tipo);
+    //imprimir_pastilhas ();
 
-
-    //Dando Free nas estruturas usadas
-    fprintf (stderr, "freeing memory spaces\n");
-    liberando_imagem (imputppm);
-    liberando_imagem (outputppm);
-    liberando_pastilhas (pastilhas);
-
-   return 0;
+    fprintf (stderr, "Fechando o diretorio %s\n", nome_diretorio);
+    (void)closedir(diretorio);
+    return 0;
 }
