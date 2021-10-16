@@ -8,6 +8,7 @@
 #define MAX_TYPE 2
 #define COMPONENTES_IMG 2
 #define N_PASTILHAS 1024
+#define ZERO 0
 
 typedef struct {
     int vermelho, verde, azul;
@@ -61,5 +62,10 @@ void ler_imagem (t_ppm *, char * );
 //Carrega os pixels do arquivo para a memória
 //É passado um FILE *, o arquivo, um int, o tipo da imagem, e dois int's, as dimensões da matriz
 void carrega_pixels (FILE *, t_pixel **, int , int , int );
+
+//Carrega a média de um bloco
+//É passada a matriz de pixel do bloco; a largura e a altura, até onde o bloco vai; e a posisão aonde começa o bloco
+//É retornada um t_pixel que é a média calculada
+t_pixel media_bloco (t_pixel **, int , int , int, int);
 
 #endif

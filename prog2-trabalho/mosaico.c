@@ -11,7 +11,8 @@
 int main (int argc, char *argv[]) {
 
     DIR *diretorio;
-    t_ppm *entradappm, *saidappm;
+    //t_ppm *entradappm, *saidappm;
+    t_pixel *cor_media_bloco;
     t_vetor_pastilhas *vetor;
     struct dirent *file_directory;
     char *nome_entrada, *nome_saida, *nome_diretorio;
@@ -90,9 +91,24 @@ int main (int argc, char *argv[]) {
     padrao_pastilhas (file_directory, nome_diretorio, &past_lar, &past_alt);
     rewinddir (diretorio);
 
+    
     vetor = abrir_pastilhas (diretorio, file_directory, nome_diretorio, past_lar, past_alt);
 
-    //imprimir_pastilhas ();
+    fprintf (stderr, "%d tiles read\n", vetor->tam);    
+    fprintf (stderr, "Tile size is %dx%d\n", past_lar, past_alt);
+    
+    cor_media_bloco = malloc (sizeof(t_pixel)*vetor->tam);
+    if (!cor_media_bloco) {
+        perror ("Error");
+        fprintf (stderr, "Não foi possível alocar memória para o vetor de ponteiros\n");
+        exit (1);
+    }
+
+    for (int i = 0; i < vetor->tam; i++) {
+        cor_media_bloco[i] = media_bloco (vetor->vetor[i].imagem->matrix, past_lar, past_alt, ZERO, ZERO);
+    }
+    
+    //imprimir_pastilhas (vetor);
 
     fprintf (stderr, "Fechando o diretorio %s\n", nome_diretorio);
     (void)closedir(diretorio);

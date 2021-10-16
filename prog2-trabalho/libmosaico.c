@@ -67,33 +67,50 @@ t_pixel ** aloca_matriz_pixel (int largura, int altura) {
     return matriz;
 
 }
+void ignorando_comentarios (FILE * arquivo) {
 
+    char caractere;
+
+    //Bloco: enquanto for # (comentarios) vai pegando caractere do arquivo
+    caractere = getc (arquivo);
+    while ((caractere == '#') || (caractere == '\n')) {
+        while ( caractere != '\n') 
+            caractere = getc (arquivo);
+        caractere = getc (arquivo);
+    }                                                                //Fim do bloco
+
+    //Quando ele sai do laço mais interno ele pega mais um caractere para a verificação, essa função devolve ele para o
+    //arquivo
+    ungetc (caractere, arquivo);
+
+}
 void padrao_pastilhas (struct dirent * file, char *nome_diretorio, int *largura, int *altura) {
 
     FILE *arquivo;
     char *nome_arquivo;
-    char tipo[MAX_TYPE + 1];
-    int max_rgb;
+    char type[MAX_TYPE + 1];
 
     nome_arquivo = aloca_vetor (TAM_ENTRADA);
 
     strcpy (nome_arquivo, nome_diretorio);
     strcat (nome_arquivo, file->d_name);
 
-    arquivo = fopen (nome_arquivo, "w");
+    arquivo = fopen (nome_arquivo, "r");
     if (! arquivo) {
         perror ("Error");
         fprintf (stderr, "Não foi possível abrir o arquivo %s\n", nome_arquivo);
         exit (1);
     }
 
-    if (! fgets (tipo, MAX_TYPE + 1, arquivo)) {
+    fprintf (stderr, "%s\n", nome_arquivo);
+
+    if (! (fgets (type, MAX_TYPE + 1, arquivo))) {
         perror ("Error");
         fprintf (stderr, "Não foi possível ler o tipo da imagem do padrão pastilhas\n");
         exit (1);
     }
 
-    ignorando_comentario (arquivo);
+    ignorando_comentarios (arquivo);
 
     if ( fscanf(arquivo, "%d %d", largura, altura) != COMPONENTES_IMG) {
         perror ("Error");
@@ -144,7 +161,7 @@ t_vetor_pastilhas * abrir_pastilhas (DIR * diretorio, struct dirent * file, char
         ler_imagem (ptr->vetor[ptr->tam].imagem, ptr->vetor[ptr->tam].imagem->nome_arquivo);
         ptr->tam++;
 
-        if (ptr->tam >= N_PASTILHAS*mult) {
+        if (ptr->tam == N_PASTILHAS*mult) {
             mult++;
             ptr->vetor = realloc (ptr->vetor, sizeof(t_pastilha) * (N_PASTILHAS * mult));
             for (int i = 0; i < N_PASTILHAS*mult; i++) {
@@ -153,23 +170,6 @@ t_vetor_pastilhas * abrir_pastilhas (DIR * diretorio, struct dirent * file, char
         }        
     }
     return ptr;
-
-}
-void ignorando_comemtarios (FILE * arquivo) {
-
-    char caractere;
-
-    //Bloco: enquanto for # (comentarios) vai pegando caractere do arquivo
-    caractere = getc (arquivo);
-    while ((caractere == '#') || (caractere == '\n')) {
-        while ( caractere != '\n') 
-            caractere = getc (arquivo);
-        caractere = getc (arquivo);
-    }                                                                //Fim do bloco
-
-    //Quando ele sai do laço mais interno ele pega mais um caractere para a verificação, essa função devolve ele para o
-    //arquivo
-    ungetc (caractere, arquivo);
 
 }
 void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
@@ -226,15 +226,16 @@ void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
     fclose (arquivo);
 
 }
+
 void carrega_pixels (FILE *arquivo, t_pixel ** matriz, int tipo, int largura, int altura) {
     
     //Se a imagem for P6
     if ( ! tipo ) {
         for (int i = 0; i < largura; i ++) {
             for (int j = 0; j < altura; j++) {
-                fread (matriz[i][j].vermelho, tipo + 1, 1, arquivo);
-                fread (matriz[i][j].verde, tipo + 1, 1, arquivo);
-                fread (matriz[i][j].azul, tipo + 1, 1, arquivo);
+                fread (&matriz[i][j].vermelho, tipo + 1, 1, arquivo);
+                fread (&matriz[i][j].verde, tipo + 1, 1, arquivo);
+                fread (&matriz[i][j].azul, tipo + 1, 1, arquivo);
             }
         }
     }
@@ -248,4 +249,27 @@ void carrega_pixels (FILE *arquivo, t_pixel ** matriz, int tipo, int largura, in
             }
         }
     }  
+}
+
+t_pixel media_bloco (t_pixel **matriz, int largura, int altura, int largura_ini, int altura_ini) {
+
+}
+
+void    imprimir_pastilhas (t_vetor_pastilhas * vetor) {
+
+    FILE *arquivo;
+    arquivo = fopen ("teste.txt", "w");
+    if (! arquivo) {
+        perror ("Error");
+        fprintf (stderr, "Não foi possível abrir o arquivo teste.txt\n");
+        exit (1);
+    }
+
+    for (int i = 0; i < vetor->tam; i++) {
+        fprintf (arquivo, "%s\n", vetor->vetor[i].imagem->nome_arquivo);
+        fprintf (arquivo, "%d\n", vetor->vetor[i].imagem->tipo);
+        fprintf (arquivo, "%d %d\n", vetor->vetor[i].imagem->largura, vetor->vetor[i].imagem->altura);
+    }
+
+    fclose (arquivo);
 }
