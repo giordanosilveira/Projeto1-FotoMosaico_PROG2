@@ -75,7 +75,7 @@ void padrao_pastilhas (struct dirent * file, char *nome_diretorio, int *largura,
     char tipo[MAX_TYPE + 1];
     int max_rgb;
 
-    nome_arquivo = aloca_string (TAM_ENTRADA);
+    nome_arquivo = aloca_vetor (TAM_ENTRADA);
 
     strcpy (nome_arquivo, nome_diretorio);
     strcat (nome_arquivo, file->d_name);
@@ -148,9 +148,68 @@ t_vetor_pastilhas * abrir_pastilhas (DIR * diretorio, struct dirent * file, char
             mult++;
             ptr->vetor = realloc (ptr->vetor, sizeof(t_pastilha) * (N_PASTILHAS * mult));
             for (int i = 0; i < N_PASTILHAS*mult; i++) {
-                
+                ptr->vetor[i].imagem = inicializa_imagem (largura, altura); 
             }
         }        
     }
+    return ptr;
 
+}
+void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
+
+    FILE *arquivo;
+    char *tipo_ppm;
+
+    tipo_ppm = aloca_vetor (MAX_TYPE + 1);
+
+    //Bloco: abrindo a imagem e testanta para ver se abriu o arquivo
+    arquivo = fopen (nome_arquivo, "r");
+    if (! arquivo) {
+        perror ("Error");
+        fprintf (stderr, "Não foi possivel abrir o arquivo %s\n", nome_arquivo);
+        exit (1);
+    }                                                                //Fim do bloco
+
+    //Bloco: Lendo o tipo da imagem e testando para ver se foi lido
+    if (! fgets (tipo_ppm, MAX_TYPE + 1, arquivo)) {
+        perror ("Error");
+        fprintf (stderr, "Não foi possível ler o tipo da imagem\n");
+        exit (1);
+    }                                                                //Fim do bloco
+
+    if (! strcmp (tipo_ppm, "P6")) {
+        imagem->tipo = 0;
+    }
+    else
+        imagem->tipo = 1;
+    
+    //tratando os comentários
+    //ignorando_comentarios (arquivo);
+
+    //Bloco: lendo o tamanho da imagem
+    if ( fscanf (arquivo, "%d %d", &imagem->largura, &imagem->altura) != COMPONENTES_IMG) {
+        perror ("Error");
+        fprintf (stderr, "Não foi possivel ler o tamanho da imagem\n");
+        exit (1);
+    }                                                                //Fim do bloco
+   
+    //tratando os comentários
+    //ignorando_comentarios (arquivo);
+
+    //Bloco: Lendo o componete RGB e testando para ver se foi lido
+    if (fscanf(arquivo, "%d", &imagem->componente_rgb) != 1){
+        perror ("Error");
+        fprintf (stderr, "Não foi possivel ler o componente RGB\n");
+        exit (1);
+    }                                                                //Fim do bloco
+
+    //Bloco: aloca a matriz de pixel na memória e carrega os pixels na memória
+    carrega_pixels (arquivo, imagem->matrix, imagem->tipo, imagem->largura, imagem->altura);                                             
+                                                                     //Fim do bloco
+
+    fclose (arquivo);
+
+}
+void carrega_pixels (FILE *, int tipo, int largura, int altura) {
+    
 }

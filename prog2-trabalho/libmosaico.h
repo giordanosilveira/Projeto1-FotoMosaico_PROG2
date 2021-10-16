@@ -17,7 +17,7 @@ typedef struct {
     char *nome_arquivo;
     int tipo;
     int largura, altura;
-    int max_rgb;
+    int componente_rgb;
     t_pixel **matrix;
 } t_ppm;
 
@@ -54,6 +54,13 @@ void padrao_pastilhas (struct dirent *, char *, int *, int *);
 //É retonado o verto de pastilhas com as pastilhas carregadas
 t_vetor_pastilhas * abrir_pastilhas (DIR * , struct dirent * , char * , int , int );
 
+//Lê uma imagem.ppm
+//É passado a um t_ppm para os dados da imagem e um tipo char * o nome da imagem
+void ler_imagem (t_ppm *, char * );
+
+//Carrega os pixels do arquivo para a memória
+//É passado um FILE *, o arquivo, um int, o tipo da imagem, e dois int's, as dimensões da matriz
+void carrega_pixels (FILE *, int tipo, int largura, int altura);
 
 
 
