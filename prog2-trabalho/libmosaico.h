@@ -60,8 +60,6 @@ void ler_imagem (t_ppm *, char * );
 
 //Carrega os pixels do arquivo para a memória
 //É passado um FILE *, o arquivo, um int, o tipo da imagem, e dois int's, as dimensões da matriz
-void carrega_pixels (FILE *, int tipo, int largura, int altura);
-
-
+void carrega_pixels (FILE *, t_pixel **, int , int , int );
 
 #endif

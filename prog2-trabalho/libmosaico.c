@@ -93,7 +93,7 @@ void padrao_pastilhas (struct dirent * file, char *nome_diretorio, int *largura,
         exit (1);
     }
 
-    //ignorando_comentario (arquivo);
+    ignorando_comentario (arquivo);
 
     if ( fscanf(arquivo, "%d %d", largura, altura) != COMPONENTES_IMG) {
         perror ("Error");
@@ -155,6 +155,23 @@ t_vetor_pastilhas * abrir_pastilhas (DIR * diretorio, struct dirent * file, char
     return ptr;
 
 }
+void ignorando_comemtarios (FILE * arquivo) {
+
+    char caractere;
+
+    //Bloco: enquanto for # (comentarios) vai pegando caractere do arquivo
+    caractere = getc (arquivo);
+    while ((caractere == '#') || (caractere == '\n')) {
+        while ( caractere != '\n') 
+            caractere = getc (arquivo);
+        caractere = getc (arquivo);
+    }                                                                //Fim do bloco
+
+    //Quando ele sai do laço mais interno ele pega mais um caractere para a verificação, essa função devolve ele para o
+    //arquivo
+    ungetc (caractere, arquivo);
+
+}
 void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
 
     FILE *arquivo;
@@ -177,14 +194,13 @@ void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
         exit (1);
     }                                                                //Fim do bloco
 
-    if (! strcmp (tipo_ppm, "P6")) {
+    if ( strcmp (tipo_ppm, "P6") == 0)
         imagem->tipo = 0;
-    }
     else
         imagem->tipo = 1;
     
     //tratando os comentários
-    //ignorando_comentarios (arquivo);
+    ignorando_comentarios (arquivo);
 
     //Bloco: lendo o tamanho da imagem
     if ( fscanf (arquivo, "%d %d", &imagem->largura, &imagem->altura) != COMPONENTES_IMG) {
@@ -194,7 +210,7 @@ void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
     }                                                                //Fim do bloco
    
     //tratando os comentários
-    //ignorando_comentarios (arquivo);
+    ignorando_comentarios (arquivo);
 
     //Bloco: Lendo o componete RGB e testando para ver se foi lido
     if (fscanf(arquivo, "%d", &imagem->componente_rgb) != 1){
@@ -210,6 +226,26 @@ void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
     fclose (arquivo);
 
 }
-void carrega_pixels (FILE *, int tipo, int largura, int altura) {
+void carrega_pixels (FILE *arquivo, t_pixel ** matriz, int tipo, int largura, int altura) {
     
+    //Se a imagem for P6
+    if ( ! tipo ) {
+        for (int i = 0; i < largura; i ++) {
+            for (int j = 0; j < altura; j++) {
+                fread (matriz[i][j].vermelho, tipo + 1, 1, arquivo);
+                fread (matriz[i][j].verde, tipo + 1, 1, arquivo);
+                fread (matriz[i][j].azul, tipo + 1, 1, arquivo);
+            }
+        }
+    }
+    //Se a imagem for P3
+    else {
+        for (int i = 0; i < largura; i ++) {
+            for (int j = 0; j < altura; j++) {
+                fscanf (arquivo, "%d ", &matriz[i][j].vermelho);
+                fscanf (arquivo, "%d ", &matriz[i][j].verde);
+                fscanf (arquivo, "%d ", &matriz[i][j].azul);
+            }
+        }
+    }  
 }
