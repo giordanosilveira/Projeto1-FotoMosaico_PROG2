@@ -133,12 +133,13 @@ int main (int argc, char *argv[]) {
     else
         fprintf (stderr, "Imput imagem is PPM P3, %dx%d pixels\n", imputppm->largura, imputppm->altura);
 
+    int lixo;
     fprintf (stderr, "Building mosaic imagem\n");
     outputppm = inicializa_imagem (largura_imagem, altura_imagem);
-    fotomosaico (vetor, imputppm, outputppm, cor_media_bloco);
+    lixo = fotomosaico (vetor, imputppm, outputppm, cor_media_bloco);
     
     fprintf (stderr, "Writing output file\n");
-    escrever_imagem (outputppm, nome_saida);
+    escrever_imagem (outputppm, nome_saida, lixo);
     
     
     //imprimir_pastilhas (vetor, cor_media_bloco);

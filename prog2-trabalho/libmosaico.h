@@ -70,11 +70,11 @@ void carrega_pixels (FILE *, t_pixel **, int , int , int );
 
 //Função responsável por "montar" o foto mosaico na memória. Ela faz a media dos blocos da imagem, compara e substitui eles na memória
 //É passado o vetor de pastilhas, os dados da imagem de entrada, os de saída e a media dos blocos das pastilhas 
-void fotomosaico (t_vetor_pastilhas *, t_ppm *, t_ppm *, t_pixel *);
+int fotomosaico (t_vetor_pastilhas *, t_ppm *, t_ppm *, t_pixel *);
 
 //Criar o arquivo de saída
 //É passada os dados da imagem, em formato t_ppm *, e o nome do arquivo de saída, um char * 
-void escrever_imagem (t_ppm *, char *);
+void escrever_imagem (t_ppm *, char *, int);
 
 //Carrega a média de um bloco
 //É passada a matriz de pixel do bloco; a largura e a altura do bloco e a posisão aonde começa o bloco

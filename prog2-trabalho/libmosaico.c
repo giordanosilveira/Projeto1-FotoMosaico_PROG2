@@ -260,8 +260,8 @@ void carrega_pixels (FILE *arquivo, t_pixel ** matriz, int tipo, int largura, in
     }
     //Se a imagem for P3
     else {
-        for (int i = 0; i < largura; i ++) {
-            for (int j = 0; j < altura; j++) {
+        for (int i = 0; i < altura; i ++) {
+            for (int j = 0; j < largura; j++) {
                 fscanf (arquivo, "%d ", &matriz[i][j].vermelho);
                 fscanf (arquivo, "%d ", &matriz[i][j].verde);
                 fscanf (arquivo, "%d ", &matriz[i][j].azul);
@@ -279,9 +279,8 @@ t_pixel media_bloco (t_pixel **matriz, int largura, int altura, int largura_ini,
     soma_verde = 0;
     soma_azul = 0;
 
-    fprintf (stderr, "dentro do media bloco\n");
+    //fprintf (stderr, "dentro do media bloco\n");
     //Bloco: percorre a matriz de pixels e soma os componentes RGB
-    fprintf (stderr, "pingo pingo %d %d %d %d %d %d\n", largura, altura, largura_ini, altura_ini, largura_ini + largura, altura_ini + altura);
     for (int i = altura_ini; i < altura + altura_ini; i++) {
         for (int j = largura_ini; j < largura + largura_ini; j++) {
             soma_vermelho += matriz[i][j].vermelho;
@@ -357,7 +356,7 @@ int compara_blocos (int tam_vetor, t_pixel *media_bloco_pastilhas, t_pixel bloco
 }
 void substitui_bloco (t_pixel ** matriz_saida, t_pixel ** matriz_pastilha, int linha_inicial, int linha_final, int coluna_inicial, int coluna_final) {
 
-    fprintf (stderr, "dentro do substitui bloco\n");
+    //fprintf (stderr, "dentro do substitui bloco\n");
     int i, j;
     i = 0;
     for (int k = linha_inicial; k < linha_final; k++) {
@@ -384,55 +383,53 @@ int condicoes_imagem (int linha_ini, int coluna_ini, int altura_imagem, int larg
         return 3;
 
 }
-void fotomosaico (t_vetor_pastilhas *vetor, t_ppm *entrada, t_ppm *saida, t_pixel *media_pastlhas) {
+int fotomosaico (t_vetor_pastilhas *vetor, t_ppm *entrada, t_ppm *saida, t_pixel *media_pastlhas) {
 
+    int tipo;
     int retorno, tam_bloco, pos_menor, size;
     t_pixel bloco_imagem;
 
     size = vetor->tam;
     tam_bloco = vetor->vetor[0].imagem->altura;
-    //fprintf (stderr, "aqui -> %d\n", tam_bloco);
 
     copia_dados (saida, entrada);
     for (int i = 0; i < saida->altura; i += tam_bloco ) {
         for (int j = 0; j < saida->largura; j += tam_bloco ) {
             
-            //fprintf (stderr, "aqui\n");
             retorno = condicoes_imagem (i, j, saida->altura, saida->largura, tam_bloco);
             switch (retorno) {
                 case 0 :
-                    fprintf (stderr, "Caso 0\n");
                     bloco_imagem = media_bloco (entrada->matrix, saida->largura - j, saida->altura - i, j, i);
                     pos_menor = compara_blocos (size, media_pastlhas, bloco_imagem);
                     substitui_bloco (saida->matrix, vetor->vetor[pos_menor].imagem->matrix, i, saida->altura, j, saida->largura);
                     break;
                 case 1 :
-                    fprintf (stderr, "Caso 1 %d %d %d %d %d %d\n", i, saida->altura - i, j, saida->largura - j, (saida->altura - i) + i, tam_bloco + j);
                     bloco_imagem = media_bloco (entrada->matrix, tam_bloco, saida->altura - i, j, i);
                     pos_menor = compara_blocos (size ,media_pastlhas, bloco_imagem);
-                    fprintf (stderr, "aqui -> %d %d %d %d %d %d\n", i, saida->altura - i, j, saida->largura - j, (saida->altura - i) + i, tam_bloco + j);
                     substitui_bloco (saida->matrix, vetor->vetor[pos_menor].imagem->matrix, i, saida->altura, j, j + tam_bloco);
-                    fprintf (stderr, "passou\n");
+                    break;
                 case 2 :
-                    fprintf (stderr, "case 2\n");
-                    fprintf (stderr, "aqui 2 -> %d %d %d %d %d %d\n", i, saida->altura - i, j, saida->largura - j, (saida->altura - i) + i, tam_bloco + j);
-                    bloco_imagem = media_bloco (entrada->matrix, saida->largura, tam_bloco, j, i);
+                    bloco_imagem = media_bloco (entrada->matrix, saida->largura - j, tam_bloco, j, i);
                     pos_menor = compara_blocos (size, media_pastlhas, bloco_imagem);
                     substitui_bloco (saida->matrix, vetor->vetor[pos_menor].imagem->matrix, i, i + tam_bloco, j, saida->largura);
-                    fprintf (stderr, "passou 2 \n");
+                    break;
                 default:
-                    fprintf (stderr, "case 3\n");
                     bloco_imagem = media_bloco (entrada->matrix, tam_bloco, tam_bloco, j, i);
                     pos_menor = compara_blocos (size, media_pastlhas, bloco_imagem);
                     substitui_bloco (saida->matrix, vetor->vetor[pos_menor].imagem->matrix, i, i + tam_bloco, j, j + tam_bloco);
+                    if ( (i == 0) && (j == 0)) {
+                        if (vetor->vetor[pos_menor].imagem->tipo == 1)
+                            tipo = 1;
+                    }
                     break;
             }
 
         }
     }
+    return tipo;
 
 }
-void escrever_imagem (t_ppm *outputppm, char *name_output) {
+void escrever_imagem (t_ppm *outputppm, char *name_output, int teste) {
 
     FILE *arquivo;
     arquivo = fopen (name_output, "w");
@@ -449,7 +446,15 @@ void escrever_imagem (t_ppm *outputppm, char *name_output) {
 
     fprintf (arquivo, "# Autor: Giordano Henrique Silveira\n");
     fprintf (arquivo, "%d %d\n", outputppm->largura, outputppm->altura);
-    fprintf (arquivo, "%d\n", outputppm->componente_rgb);
+
+    if (outputppm->tipo)
+        fprintf (arquivo, "%d\n", outputppm->componente_rgb);
+    else {
+        if (teste)
+            fprintf (arquivo, "%d  \n", outputppm->componente_rgb);
+        else
+            fprintf (arquivo, "%d", outputppm->componente_rgb);    
+    }
 
     if (outputppm->tipo == 0) {
         for (int i = 0; i < outputppm->altura; i++) {
