@@ -90,8 +90,21 @@ int main (int argc, char *argv[]) {
 
     }                                                       //Fim do bloco
 
-    //Passa o primeiro arquivo para pegar o tamanho padrão das pastilhas que serão usadas durante o resto do programa
-    padrao_pastilhas (file_directory, nome_diretorio, &past_lar, &past_alt);
+    char *nome_arquivo;
+    nome_arquivo = aloca_vetor (TAM_ENTRADA);
+    strcpy (nome_arquivo, nome_diretorio);
+    strcat (nome_arquivo, file_directory->d_name);
+
+    FILE * arquivo_pastilha;
+    arquivo_pastilha = fopen (nome_arquivo, "r");
+    if (! arquivo_pastilha) {
+        perror ("Error");
+        fprintf (stderr, "Não foi possível abrir o arquivo %s\n", nome_arquivo);
+        exit (1);
+    }
+
+    tamanho_imagem (arquivo_pastilha, &past_lar, &past_alt);
+    fclose (arquivo_pastilha);
 
     rewinddir (diretorio);  //Move o ponteiro para o início do diretório
 

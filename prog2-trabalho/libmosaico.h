@@ -42,15 +42,6 @@ char * aloca_vetor (int );
 //Retorna um t_ppm ponteiro com as estruturas inicializadas
 t_ppm * inicializa_imagem (int , int );
 
-//Aloca um vetor do t_pixel
-//É passado para a função a largura e a altura da função
-//Retorna o pontreiro da matriz alocada
-t_pixel ** aloca_matriz_pixel (int largura, int altura);
-
-//Descobre o tamanho das pastilhas que vão ser usadas
-//É passado uma struct dirent, o nome do diretório e dois inteiros que são o retorno da largura e altura das pastilhas
-void padrao_pastilhas (struct dirent *, char *, int *, int *);
-
 //Descobre o tamanho da imagem.ppm
 //Retornar as dimensões nos dois inteiros passados como parâmetro
 void tamanho_imagem (FILE *, int *, int *);
@@ -63,10 +54,6 @@ t_vetor_pastilhas * abrir_pastilhas (DIR * , struct dirent * , char * , int , in
 //Lê uma imagem.ppm
 //É passado a um t_ppm para os dados da imagem e um tipo char * o nome da imagem
 void ler_imagem (t_ppm *, char * );
-
-//Carrega os pixels do arquivo para a memória
-//É passado um FILE *, o arquivo, um int, o tipo da imagem, e dois int's, as dimensões da matriz
-void carrega_pixels (FILE *, t_pixel **, int , int , int );
 
 //Função responsável por "montar" o foto mosaico na memória. Ela faz a media dos blocos da imagem, compara e substitui eles na memória
 //É passado o vetor de pastilhas, os dados da imagem de entrada, os de saída e a media dos blocos das pastilhas 

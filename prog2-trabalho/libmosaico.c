@@ -22,24 +22,9 @@ char *aloca_vetor (int tam) {
     return string;
 
 }
-
-t_ppm * inicializa_imagem (int largura, int altura) {
-
-    t_ppm *imagem;
-    imagem = malloc (sizeof (t_ppm));       //Aloca um vetor t_ppm (tipo ppm)
-    if (! imagem){                          //Teste para ver se alocou
-        perror ("Error");
-        fprintf (stderr, "Não foi possível alocar um espaço na memória para o tipo imagem\n");
-        exit (1);
-    }
-
-    imagem->nome_arquivo = aloca_vetor (TAM_ENTRADA);       //Aloca um vetor de char
-    imagem->matrix = aloca_matriz_pixel (largura, altura);  //Aloca uma matriz de pixel
-
-    return imagem;
-
-}
-
+//Aloca uma matriz do t_pixel
+//É passado para a função a largura e a altura da função
+//Retorna o pontreiro da matriz alocada
 t_pixel ** aloca_matriz_pixel (int largura, int altura) {
 
     t_pixel **matriz;
@@ -68,6 +53,24 @@ t_pixel ** aloca_matriz_pixel (int largura, int altura) {
     return matriz;
 
 }
+t_ppm * inicializa_imagem (int largura, int altura) {
+
+    t_ppm *imagem;
+    imagem = malloc (sizeof (t_ppm));       //Aloca um vetor t_ppm (tipo ppm)
+    if (! imagem){                          //Teste para ver se alocou
+        perror ("Error");
+        fprintf (stderr, "Não foi possível alocar um espaço na memória para o tipo imagem\n");
+        exit (1);
+    }
+
+    imagem->nome_arquivo = aloca_vetor (TAM_ENTRADA);       //Aloca um vetor de char
+    imagem->matrix = aloca_matriz_pixel (largura, altura);  //Aloca uma matriz de pixel
+
+    return imagem;
+
+}
+//Trata dos comentários do imagem.ppm se ela tiver
+//É passado um FILE *, o arquivo
 void ignorando_comentarios (FILE * arquivo) {
 
     char caractere;
@@ -85,45 +88,6 @@ void ignorando_comentarios (FILE * arquivo) {
     ungetc (caractere, arquivo);
 
 }
-void padrao_pastilhas (struct dirent * file, char *nome_diretorio, int *largura, int *altura) {
-
-    FILE *arquivo;
-    char *nome_arquivo;
-    char type[MAX_TYPE + 1];
-
-    nome_arquivo = aloca_vetor (TAM_ENTRADA);
-
-    strcpy (nome_arquivo, nome_diretorio);
-    strcat (nome_arquivo, file->d_name);
-
-    //Bloco: abre o arquivo requisitado e testa para ver se abriu
-    arquivo = fopen (nome_arquivo, "r");
-    if (! arquivo) {
-        perror ("Error");
-        fprintf (stderr, "Não foi possível abrir o arquivo %s\n", nome_arquivo);
-        exit (1);   
-    }                                                               //Fim do bloco
-
-    //Bloco: Lê o tipo da imagem (P6 ou P3) e testa para ver se o fgets leu corretamente
-    if (! (fgets (type, MAX_TYPE + 1, arquivo))) {
-        perror ("Error");
-        fprintf (stderr, "Não foi possível ler o tipo da imagem do padrão pastilhas\n");
-        exit (1);
-    }                                                               //Fim do bloco
-
-    ignorando_comentarios (arquivo);                                //Trata da parte dos comentários
-
-    //Bloco: Lê a largura e a altura da imagem e testa para ver se o scanf leu corretamente
-    if ( fscanf(arquivo, "%d %d", largura, altura) != COMPONENTES_IMG) {
-        perror ("Error");
-        fprintf (stderr, "O número de componentes da imagem dentro da função pastilhas_padrão foi lido errado\n");
-        exit (1);
-    }                                                               //Fim do bloco
-
-    fclose (arquivo);                                               //Fecha o arquivo
-
-}
-
 void tamanho_imagem (FILE *entradappm, int *largura, int *altura) {
 
     char type[MAX_TYPE + 1];
@@ -207,6 +171,31 @@ t_vetor_pastilhas * abrir_pastilhas (DIR * diretorio, struct dirent * file, char
     return ptr;
 
 }
+//Carrega os pixels do arquivo para a memória
+//É passado um FILE *, o arquivo, um int, o tipo da imagem, e dois int's, as dimensões da matriz
+void carrega_pixels (FILE *arquivo, t_pixel ** matriz, int tipo, int largura, int altura) {
+    
+    //Se a imagem for P6
+    if ( ! tipo ) {
+        for (int i = 0; i < altura; i ++) {
+            for (int j = 0; j < largura; j++) {
+                fread (&matriz[i][j].vermelho, tipo + 1, 1, arquivo);
+                fread (&matriz[i][j].verde, tipo + 1, 1, arquivo);
+                fread (&matriz[i][j].azul, tipo + 1, 1, arquivo);
+            }
+        }
+    }
+    //Se a imagem for P3
+    else {
+        for (int i = 0; i < altura; i ++) {
+            for (int j = 0; j < largura; j++) {
+                fscanf (arquivo, "%d ", &matriz[i][j].vermelho);
+                fscanf (arquivo, "%d ", &matriz[i][j].verde);
+                fscanf (arquivo, "%d ", &matriz[i][j].azul);
+            }
+        }
+    }  
+}
 void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
 
     FILE *arquivo;
@@ -263,29 +252,6 @@ void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
 
 }
 
-void carrega_pixels (FILE *arquivo, t_pixel ** matriz, int tipo, int largura, int altura) {
-    
-    //Se a imagem for P6
-    if ( ! tipo ) {
-        for (int i = 0; i < altura; i ++) {
-            for (int j = 0; j < largura; j++) {
-                fread (&matriz[i][j].vermelho, tipo + 1, 1, arquivo);
-                fread (&matriz[i][j].verde, tipo + 1, 1, arquivo);
-                fread (&matriz[i][j].azul, tipo + 1, 1, arquivo);
-            }
-        }
-    }
-    //Se a imagem for P3
-    else {
-        for (int i = 0; i < altura; i ++) {
-            for (int j = 0; j < largura; j++) {
-                fscanf (arquivo, "%d ", &matriz[i][j].vermelho);
-                fscanf (arquivo, "%d ", &matriz[i][j].verde);
-                fscanf (arquivo, "%d ", &matriz[i][j].azul);
-            }
-        }
-    }  
-}
 
 t_pixel media_bloco (t_pixel **matriz, int largura, int altura, int largura_ini, int altura_ini) {
 
@@ -328,7 +294,7 @@ void copia_dados (t_ppm *destino, t_ppm* origem) {
 
 //Calcula a menor distancia entre as cores do bloco da imagem principal analizado e as pastilhas
 //Contas baseados no texto da wikipedia sobre distancia entre cores
-int compara_blocos (int tam_vetor, t_pixel *media_bloco_pastilhas, t_pixel bloco_imagem) {
+static int compara_blocos (int tam_vetor, t_pixel *media_bloco_pastilhas, t_pixel bloco_imagem) {
 
     int indice_menor;
     float deltaC, menor_deltaC, delta_r, delta_g, delta_b, media_r;
@@ -391,7 +357,7 @@ void substitui_bloco (t_pixel ** matriz_saida, t_pixel ** matriz_pastilha, int l
 }
 //Analiza os casos que podem ocorrer quando se anda em blocos pela matriz da imagem de saída
 //Retorna um inteiro mostrando qual caso é
-int condicoes_imagem (int linha_ini, int coluna_ini, int altura_imagem, int largura_imagem, int tam_bloco) {
+static int condicoes_imagem (int linha_ini, int coluna_ini, int altura_imagem, int largura_imagem, int tam_bloco) {
 
     //Se for o último bloco e não couber uma pastilha de NxN ali
     if ((linha_ini + tam_bloco > altura_imagem) && (coluna_ini + tam_bloco > largura_imagem))
