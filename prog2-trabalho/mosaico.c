@@ -68,16 +68,18 @@ int main (int argc, char *argv[]) {
         strcpy (nome_diretorio, "./tiles/");
     }                                                       //Fim do bloco.
 
+    //Bloco: Abre o diretório e testa para ver se ele abriu
     fprintf (stderr, "Abrindo o diretorio %s\n", nome_diretorio);
     diretorio = opendir (nome_diretorio);
     if (! diretorio) {
         perror ("Error");
         fprintf (stderr, "Não foi possível abrir o diretorio %s\n", nome_diretorio);
         exit (1);
-    }
+    }                                                       //Fim do bloco
 
-    file_directory = readdir (diretorio);
+    file_directory = readdir (diretorio);  //Pega o primeiro item do diretório
 
+    //Bloco: Anda até pegar o primeiro arquivo
     while (! (strcmp(file_directory->d_name, ".")) || ! (strcmp(file_directory->d_name, ".."))) {
 
         if ( ! (file_directory = readdir (diretorio))) {
@@ -86,25 +88,29 @@ int main (int argc, char *argv[]) {
             exit (1);
         }
 
-    }
+    }                                                       //Fim do bloco
 
+    //Passa o primeiro arquivo para pegar o tamanho padrão das pastilhas que serão usadas durante o resto do programa
     padrao_pastilhas (file_directory, nome_diretorio, &past_lar, &past_alt);
-    rewinddir (diretorio);
 
-    
+    rewinddir (diretorio);  //Move o ponteiro para o início do diretório
+
+    //Abre todas as pastilhas e carregas elas na memória
     vetor = abrir_pastilhas (diretorio, file_directory, nome_diretorio, past_lar, past_alt);
 
     fprintf (stderr, "%d tiles read\n", vetor->tam);    
     fprintf (stderr, "Tile size is %dx%d\n", past_lar, past_alt);
     
+    //Bloco: inicializa o vetor cor_media_bloco e testa para ver se ele foi alocado
     cor_media_bloco = malloc (sizeof(t_pixel)*vetor->tam);
     if (!cor_media_bloco) {
         perror ("Error");
         fprintf (stderr, "Não foi possível alocar memória para o vetor de ponteiros\n");
         exit (1);
-    }
+    }                                                       //Fim do bloco
 
     fprintf (stderr, "Calculating tiles' average colors\n");
+    //Percorre o vetor de pastilhas e calcula suas cores médias
     for (int i = 0; i < vetor->tam; i++) {
         cor_media_bloco[i] = media_bloco (vetor->vetor[i].imagem->matrix, past_lar, past_alt, ZERO, ZERO);
     }
@@ -112,43 +118,46 @@ int main (int argc, char *argv[]) {
     FILE * entradappm;
     int largura_imagem, altura_imagem;
 
+    //Bloco: Abre a imagem de entrada e testa para ver se ela foi alocada corretamente
     fprintf (stderr, "Reading imput imagem\n");
     entradappm = fopen (nome_entrada, "r");
     if (! entradappm ){
         perror ("Error");
         fprintf (stderr, "Não foi possível abrir a imagem %s\n", nome_entrada);
         exit (1);
-    }
+    }                                                       //Fim do bloco
 
+    //Abre o arquivo e pega suas dimensões que serão usadas na função inicializa imagem
     tamanho_imagem (entradappm, &largura_imagem, &altura_imagem);
     imputppm = inicializa_imagem (largura_imagem, altura_imagem);
 
-    //rewind (entradappm);
     fclose(entradappm);
 
+    //Agora abre realmente o arquivo e pega todos os seus dados
     ler_imagem (imputppm, nome_entrada);
 
+    //Só um teste para saber o que escrever
     if (imputppm->tipo == 0)
         fprintf (stderr, "Imput imagem is PPM P6, %dx%d pixels\n", imputppm->largura, imputppm->altura);
     else
         fprintf (stderr, "Imput imagem is PPM P3, %dx%d pixels\n", imputppm->largura, imputppm->altura);
 
+    //Bloco: Parte que trata da imagem de saída
     int lixo;
     fprintf (stderr, "Building mosaic imagem\n");
     outputppm = inicializa_imagem (largura_imagem, altura_imagem);
     lixo = fotomosaico (vetor, imputppm, outputppm, cor_media_bloco);
+                                                            //Fim do bloco
     
+    //Escreve a imagem de saída
     fprintf (stderr, "Writing output file\n");
     escrever_imagem (outputppm, nome_saida, lixo);
     
-    
-    //imprimir_pastilhas (vetor, cor_media_bloco);
-
-
-
+    //Fecha o diretório
     fprintf (stderr, "Fechando o diretorio %s\n", nome_diretorio);
     (void)closedir(diretorio);
     
+    //Bloco: Desaloca as estruturas de memória usadas
     free (cor_media_bloco);
     free (imputppm->matrix[0]);
     free (imputppm->matrix);
@@ -167,7 +176,7 @@ int main (int argc, char *argv[]) {
         free (vetor->vetor[i].imagem);
     }
     free (vetor->vetor);
-    free (vetor);
+    free (vetor);                                           //Fim do bloco
 
     return 0;
 }

@@ -12,8 +12,8 @@
 char *aloca_vetor (int tam) {
 
     char *string;
-    string = malloc (sizeof (char) * tam);
-    if ( ! string ) {
+    string = malloc (sizeof (char) * tam);  //Aloca um vetor de char
+    if ( ! string ) {                       //Teste para ver se alocou
         perror ("Error");
         fprintf (stderr, "Não foi possível alocar espaço para uma string\n");
         exit (1);
@@ -26,15 +26,15 @@ char *aloca_vetor (int tam) {
 t_ppm * inicializa_imagem (int largura, int altura) {
 
     t_ppm *imagem;
-    imagem = malloc (sizeof (t_ppm));
-    if (! imagem){
+    imagem = malloc (sizeof (t_ppm));       //Aloca um vetor t_ppm (tipo ppm)
+    if (! imagem){                          //Teste para ver se alocou
         perror ("Error");
         fprintf (stderr, "Não foi possível alocar um espaço na memória para o tipo imagem\n");
         exit (1);
     }
 
-    imagem->nome_arquivo = aloca_vetor (TAM_ENTRADA);
-    imagem->matrix = aloca_matriz_pixel (largura, altura);
+    imagem->nome_arquivo = aloca_vetor (TAM_ENTRADA);       //Aloca um vetor de char
+    imagem->matrix = aloca_matriz_pixel (largura, altura);  //Aloca uma matriz de pixel
 
     return imagem;
 
@@ -50,19 +50,19 @@ t_pixel ** aloca_matriz_pixel (int largura, int altura) {
         perror ("Error");
         fprintf (stderr, "Não foi possivel alocar espaço para os ponteiros da matriz de pixel\n");
         exit (1);
-    }                                                                  //Fim do bloco
+    }                                                                   //Fim do bloco
 
-    //Bloco: aloca espaço para a matriz de linhas contíguas
+    //Bloco: aloca espaço para a matriz de linhas contíguas (método 3 na wiki do Maziero)
     matriz[0] = malloc (largura * altura * sizeof(t_pixel));
     if (! matriz[0]) {
         perror ("Error");
         fprintf (stderr, "Não foi possivel alocar espaço para a matriz\n");
         exit (1);
-    }                                                                 //Fim do bloco
+    }                                                                   //Fim do bloco
 
     //Arruma os ponteiros
     int i;
-    for (i = 0; i < altura; i++)
+    for (i = 0; i < altura; i++)                                        
         matriz[i] = matriz[0] + i*largura;
 
     return matriz;
@@ -96,28 +96,31 @@ void padrao_pastilhas (struct dirent * file, char *nome_diretorio, int *largura,
     strcpy (nome_arquivo, nome_diretorio);
     strcat (nome_arquivo, file->d_name);
 
+    //Bloco: abre o arquivo requisitado e testa para ver se abriu
     arquivo = fopen (nome_arquivo, "r");
     if (! arquivo) {
         perror ("Error");
         fprintf (stderr, "Não foi possível abrir o arquivo %s\n", nome_arquivo);
-        exit (1);
-    }
+        exit (1);   
+    }                                                               //Fim do bloco
 
+    //Bloco: Lê o tipo da imagem (P6 ou P3) e testa para ver se o fgets leu corretamente
     if (! (fgets (type, MAX_TYPE + 1, arquivo))) {
         perror ("Error");
         fprintf (stderr, "Não foi possível ler o tipo da imagem do padrão pastilhas\n");
         exit (1);
-    }
+    }                                                               //Fim do bloco
 
-    ignorando_comentarios (arquivo);
+    ignorando_comentarios (arquivo);                                //Trata da parte dos comentários
 
+    //Bloco: Lê a largura e a altura da imagem e testa para ver se o scanf leu corretamente
     if ( fscanf(arquivo, "%d %d", largura, altura) != COMPONENTES_IMG) {
         perror ("Error");
         fprintf (stderr, "O número de componentes da imagem dentro da função pastilhas_padrão foi lido errado\n");
         exit (1);
-    }
+    }                                                               //Fim do bloco
 
-    fclose (arquivo);
+    fclose (arquivo);                                               //Fecha o arquivo
 
 }
 
@@ -125,19 +128,21 @@ void tamanho_imagem (FILE *entradappm, int *largura, int *altura) {
 
     char type[MAX_TYPE + 1];
     
+    //Bloco: Lê o tipo da imagem (P6 ou P3) e testa para ver se o fgets leu corretamente
     if (! (fgets (type, MAX_TYPE + 1, entradappm))) {
         perror ("Error");
         fprintf (stderr, "Não foi possível ler o tipo da imagem do padrão pastilhas\n");
         exit (1);
-    }
+    }                                                               //Fim do bloco
 
     ignorando_comentarios (entradappm);
 
+    //Bloco: Lê a largura e a altura da imagem e testa para ver se o scanf leu corretamente
     if ( fscanf(entradappm, "%d %d", largura, altura) != COMPONENTES_IMG) {
         perror ("Error");
         fprintf (stderr, "O número de componentes da imagem dentro da função pastilhas_padrão foi lido errado\n");
-        exit (1);
-    }
+        exit (1);   
+    }                                                               //Fim do bloco
 
 }
 
@@ -148,46 +153,57 @@ t_vetor_pastilhas * abrir_pastilhas (DIR * diretorio, struct dirent * file, char
 
     mult = 1;
 
+    //Bloco: aloca um ptr do tipo t_vetor_pastilhas e testa para ver se alocou
     ptr = malloc (sizeof (t_vetor_pastilhas));
     if (! ptr) {
         perror ("Error");
         fprintf (stderr, "Não foi possível alocar espaço para o t_vetor_pastilhas\n");
         exit (1);
-    }
+    }                                                               //Fim do bloco
 
-    ptr->tam = 0;
-    ptr->vetor = malloc (sizeof (t_pastilha) * N_PASTILHAS);
+    //Bloco: inicializa as estruturas do tipo t_vetor_pastilhas
+    ptr->tam = 0;                                                   //Tamanho do vetor de pastilhas = 0                                                       
+    ptr->vetor = malloc (sizeof (t_pastilha) * N_PASTILHAS);        //Aloca espaço para um vetor t_pastilha e testa para ver se alocou
     if (! ptr->vetor) {
         perror ("Error");
         fprintf (stderr, "Não foi possível alocar espaço para o vetor t_pastilhas dentro de t_vetor_pastilhas\n");
         exit (1);
-    }
+    }                                                               //Fim do bloco
 
+    //Inicializa a estrutura t_ppm dentro do tipo t_pastilha
     for (int i = 0; i < N_PASTILHAS; i++) {
         ptr->vetor[i].imagem = inicializa_imagem (largura, altura);    
     }
 
+    //Bloco 1: Anda pelos arquivos do diretório, monta o nome do arquivo e passa ele para ser lido na função ler_imagem
     while ((file = readdir (diretorio))) {
 
+        //Bloco: testa para ver se não é o diretório corrente ou o anterior
         if ( ! (strcmp (file->d_name, ".")))
             continue;
         if ( ! (strcmp (file->d_name, "..")))
-            continue;
+            continue;                                               //Fim do bloco
 
+        //Bloco: monta o nome do arquivo para ser aberto
+        //Primeiro o nome da pasta e depois o nome do arquivo da pasta
         strcpy (ptr->vetor[ptr->tam].imagem->nome_arquivo, nome_diretorio);
         strcat (ptr->vetor[ptr->tam].imagem->nome_arquivo, file->d_name);
+                                                                    //Fim do bloco
 
+        //Função que lê a iamgem e carrega ela na memória
         ler_imagem (ptr->vetor[ptr->tam].imagem, ptr->vetor[ptr->tam].imagem->nome_arquivo);
         ptr->tam++;
 
-        if (ptr->tam == N_PASTILHAS*mult) {
+        //Bloco 2: realoca mais espaço na memória se necessário
+        //Se ptr->tam for igual a N_PASTILHAS (1024) vezes mult (1, ele é incrementado depois) pede mais espaço para a memória 
+        if (ptr->tam == N_PASTILHAS*mult) {                 
             mult++;
             ptr->vetor = realloc (ptr->vetor, sizeof(t_pastilha) * (N_PASTILHAS * mult));
             for (int i = ptr->tam; i < N_PASTILHAS*mult; i++) {
-                ptr->vetor[i].imagem = inicializa_imagem (largura, altura); 
+                ptr->vetor[i].imagem = inicializa_imagem (largura, altura); //Para as novas estruturas alocadas aloca um tipo imagem 
             }
-        }        
-    }
+        }                                                           //Fim do bloco 2
+    }                                                               //Fim do bloco 1
     return ptr;
 
 }
@@ -213,6 +229,7 @@ void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
         exit (1);
     }                                                                //Fim do bloco
 
+    //Se a imagem for P6, o imagem->tipo recebe 0, senão imagem->tipo recebe 1
     if ( strcmp (tipo_ppm, "P6") == 0)
         imagem->tipo = 0;
     else
@@ -299,6 +316,7 @@ t_pixel media_bloco (t_pixel **matriz, int largura, int altura, int largura_ini,
 
 }
 
+//Copia os dados da imagem origem para a imagem destino
 void copia_dados (t_ppm *destino, t_ppm* origem) {
 
     destino->tipo = origem->tipo;
@@ -308,7 +326,8 @@ void copia_dados (t_ppm *destino, t_ppm* origem) {
 
 }
 
-
+//Calcula a menor distancia entre as cores do bloco da imagem principal analizado e as pastilhas
+//Contas baseados no texto da wikipedia sobre distancia entre cores
 int compara_blocos (int tam_vetor, t_pixel *media_bloco_pastilhas, t_pixel bloco_imagem) {
 
     int indice_menor;
@@ -316,49 +335,48 @@ int compara_blocos (int tam_vetor, t_pixel *media_bloco_pastilhas, t_pixel bloco
 
     indice_menor = 0;
     
+    //Bloco: Inicializa as variáveis usando a primeira primeira pastilha do vetor de pastilhas
     delta_r = media_bloco_pastilhas[0].vermelho - bloco_imagem.vermelho;
     delta_g = media_bloco_pastilhas[0].verde - bloco_imagem.verde;
     delta_b = media_bloco_pastilhas[0].azul - bloco_imagem.azul;
 
-    //fprintf (stderr, "%f %f %f\n", delta_r, delta_g, delta_b);
     media_r = (media_bloco_pastilhas[0].vermelho + bloco_imagem.vermelho)/2;
-    //fprintf (stderr, "%f\n", media_r);
     menor_deltaC = sqrt((2 + media_r/(RGB + 1))*pow(delta_r, 2) + 4*pow(delta_g,2) + (2 + (RGB - media_r)/(RGB + 1))*pow(delta_b, 2));
-    //fprintf (stderr, "%f %d\n", menor_deltaC, tam_vetor);
-
-    if (menor_deltaC < 0)
+                                                                        //Fim do bloco
+    if (menor_deltaC < 0)   //Se for negativo o resultado (nunca vai ser, mas por precaução...), torna ele positivo
             menor_deltaC = menor_deltaC * -1;
 
+    //Bloco: Percorre o vetor de pastilhas e compara todas as pastilhas com o bloco da imagem analizado. 
+    //Acha a menor distancia e salva a posição que ela foi achada
     for (int i = 1; i < tam_vetor; i++) {
 
         delta_r = media_bloco_pastilhas[i].vermelho - bloco_imagem.vermelho;
         delta_g = media_bloco_pastilhas[i].verde - bloco_imagem.verde;
         delta_b = media_bloco_pastilhas[i].azul - bloco_imagem.azul;
-        //fprintf (stderr, "%f %f %f\n", delta_r, delta_g, delta_b);
 
         media_r = (media_bloco_pastilhas[i].vermelho + bloco_imagem.vermelho)/2;
-        //fprintf (stderr, "%f\n", media_r);
         deltaC = sqrt((2 + media_r/(RGB + 1))*pow(delta_r, 2) + 4*pow(delta_g,2) + (2 + (RGB - media_r)/(RGB + 1))*pow(delta_b, 2));
 
         if (deltaC < 0)
             deltaC = deltaC * -1;
 
-        //fprintf (stderr, "%f\n", deltaC);
         if (deltaC < menor_deltaC) {
             menor_deltaC = deltaC;
             indice_menor = i;
         }
-        //fprintf (stderr, "%f %f %d\n", deltaC, menor_deltaC, indice_menor);
-    }
+    }                                                                   //Fim do bloco
 
     return indice_menor;
 
 }
+//substitui o bloco da imagem analizada pela pastilha com a menor distância entre as cores
+//É passada a matriz da imagem de saída, a matriz origem da pastilha, e quatro inteiros, que são as posições finais e iniciais
+//da matriz da imagem de saída
 void substitui_bloco (t_pixel ** matriz_saida, t_pixel ** matriz_pastilha, int linha_inicial, int linha_final, int coluna_inicial, int coluna_final) {
 
-    //fprintf (stderr, "dentro do substitui bloco\n");
     int i, j;
     i = 0;
+    //Bloco: basicamente percorre a matriz e substitui
     for (int k = linha_inicial; k < linha_final; k++) {
         j = 0;
         for (int l = coluna_inicial; l < coluna_final; l++) {
@@ -368,17 +386,23 @@ void substitui_bloco (t_pixel ** matriz_saida, t_pixel ** matriz_pastilha, int l
             j++;
         }
         i++;
-    }
+    }                                                                   //Fim do bloco
 
 }
+//Analiza os casos que podem ocorrer quando se anda em blocos pela matriz da imagem de saída
+//Retorna um inteiro mostrando qual caso é
 int condicoes_imagem (int linha_ini, int coluna_ini, int altura_imagem, int largura_imagem, int tam_bloco) {
 
+    //Se for o último bloco e não couber uma pastilha de NxN ali
     if ((linha_ini + tam_bloco > altura_imagem) && (coluna_ini + tam_bloco > largura_imagem))
         return 0;
+    //Se estiver na última linha e não couber uma pastilha de NxN ali
     else if ((linha_ini + tam_bloco > altura_imagem))
         return 1;
+    //Se estiver na última coluna e não couber uma pastilhas de NxN ali
     else if ((coluna_ini + tam_bloco > largura_imagem))
         return 2;
+    //Caso padrão onde cabe uma pastilhas de NxN
     else
         return 3;
 
@@ -393,6 +417,8 @@ int fotomosaico (t_vetor_pastilhas *vetor, t_ppm *entrada, t_ppm *saida, t_pixel
     tam_bloco = vetor->vetor[0].imagem->altura;
 
     copia_dados (saida, entrada);
+    //Bloco: anda a matriz de entrada por blocos e sustitui, na matriz da imagem de saída, pelo bloco com a menor distância
+    //Contas facilmente explicadas 
     for (int i = 0; i < saida->altura; i += tam_bloco ) {
         for (int j = 0; j < saida->largura; j += tam_bloco ) {
             
@@ -425,7 +451,7 @@ int fotomosaico (t_vetor_pastilhas *vetor, t_ppm *entrada, t_ppm *saida, t_pixel
             }
 
         }
-    }
+    }                                                                       //Fim do bloco
     return tipo;
 
 }
@@ -439,6 +465,7 @@ void escrever_imagem (t_ppm *outputppm, char *name_output, int teste) {
         exit (1);
     }
 
+    //Bloco: Escreve o cabeçalho do tipo PPM
     if (outputppm->tipo == 0) 
         fprintf (arquivo, "P6\n");
     else
@@ -454,8 +481,9 @@ void escrever_imagem (t_ppm *outputppm, char *name_output, int teste) {
             fprintf (arquivo, "%d  \n", outputppm->componente_rgb);
         else
             fprintf (arquivo, "%d", outputppm->componente_rgb);    
-    }
+    }                                                                       //Fim do bloco
 
+    //Se for tipo P6
     if (outputppm->tipo == 0) {
         for (int i = 0; i < outputppm->altura; i++) {
             for (int j = 0; j < outputppm->largura; j++) {
@@ -465,6 +493,7 @@ void escrever_imagem (t_ppm *outputppm, char *name_output, int teste) {
             }
         }
     }
+    //Se for tipo P3
     else {
         for (int i = 0; i < outputppm->altura; i++) {
             for (int j = 0; j < outputppm->largura; j++) {
@@ -478,21 +507,4 @@ void escrever_imagem (t_ppm *outputppm, char *name_output, int teste) {
 
     fclose (arquivo);
 
-}
-void imprimir_pastilhas (t_vetor_pastilhas * vetor, t_pixel *media) {
-
-    FILE *arquivo;
-    arquivo = fopen ("teste.txt", "w");
-    if (! arquivo) {
-        perror ("Error");
-        fprintf (stderr, "Não foi possível abrir o arquivo teste.txt\n");
-        exit (1);
-    }
-
-    for (int i = 0; i < vetor->tam; i++) {
-        fprintf (arquivo, "%s\n", vetor->vetor[i].imagem->nome_arquivo);
-        fprintf (arquivo, "red %d green %d blue %d\n", media[i].vermelho, media[i].verde, media[i].azul);
-    }
-
-    fclose (arquivo);
 }
