@@ -9,6 +9,7 @@
 #define COMPONENTES_IMG 2
 #define N_PASTILHAS 1024
 #define ZERO 0
+#define RGB 255
 
 typedef struct {
     int vermelho, verde, azul;
@@ -37,7 +38,7 @@ typedef struct {
 char * aloca_vetor (int );
 
 //Inicializa o tipo imagem
-//É passado a altura e a largura da matriz de pixel usada dentro do t_ppm
+//É passado a largura e a altura da matriz de pixel usada dentro do t_ppm
 //Retorna um t_ppm ponteiro com as estruturas inicializadas
 t_ppm * inicializa_imagem (int , int );
 
@@ -49,6 +50,10 @@ t_pixel ** aloca_matriz_pixel (int largura, int altura);
 //Descobre o tamanho das pastilhas que vão ser usadas
 //É passado uma struct dirent, o nome do diretório e dois inteiros que são o retorno da largura e altura das pastilhas
 void padrao_pastilhas (struct dirent *, char *, int *, int *);
+
+//Descobre o tamanho da imagem.ppm
+//Retornar as dimensões nos dois inteiros passados como parâmetro
+void tamanho_imagem (FILE *, int *, int *);
 
 //Carrega as pastilhas da pasta para a memória
 //É passado um sctruct dirente *, o nome do diretório e dois inteiros que são o tamanho das pastilhas
@@ -63,9 +68,18 @@ void ler_imagem (t_ppm *, char * );
 //É passado um FILE *, o arquivo, um int, o tipo da imagem, e dois int's, as dimensões da matriz
 void carrega_pixels (FILE *, t_pixel **, int , int , int );
 
+//Função responsável por "montar" o foto mosaico na memória. Ela faz a media dos blocos da imagem, compara e substitui eles na memória
+//É passado o vetor de pastilhas, os dados da imagem de entrada, os de saída e a media dos blocos das pastilhas 
+void fotomosaico (t_vetor_pastilhas *, t_ppm *, t_ppm *, t_pixel *);
+
+//Criar o arquivo de saída
+//É passada os dados da imagem, em formato t_ppm *, e o nome do arquivo de saída, um char * 
+void escrever_imagem (t_ppm *, char *);
+
 //Carrega a média de um bloco
-//É passada a matriz de pixel do bloco; a largura e a altura, até onde o bloco vai; e a posisão aonde começa o bloco
+//É passada a matriz de pixel do bloco; a largura e a altura do bloco e a posisão aonde começa o bloco
 //É retornada um t_pixel que é a média calculada
 t_pixel media_bloco (t_pixel **, int , int , int, int);
+
 
 #endif

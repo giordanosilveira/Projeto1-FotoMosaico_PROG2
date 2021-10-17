@@ -11,7 +11,7 @@
 int main (int argc, char *argv[]) {
 
     DIR *diretorio;
-    //t_ppm *entradappm, *saidappm;
+    t_ppm *imputppm, *outputppm;
     t_pixel *cor_media_bloco;
     t_vetor_pastilhas *vetor;
     struct dirent *file_directory;
@@ -104,13 +104,69 @@ int main (int argc, char *argv[]) {
         exit (1);
     }
 
+    fprintf (stderr, "Calculating tiles' average colors\n");
     for (int i = 0; i < vetor->tam; i++) {
         cor_media_bloco[i] = media_bloco (vetor->vetor[i].imagem->matrix, past_lar, past_alt, ZERO, ZERO);
     }
+
+    FILE * entradappm;
+    int largura_imagem, altura_imagem;
+
+    fprintf (stderr, "Reading imput imagem\n");
+    entradappm = fopen (nome_entrada, "r");
+    if (! entradappm ){
+        perror ("Error");
+        fprintf (stderr, "Não foi possível abrir a imagem %s\n", nome_entrada);
+        exit (1);
+    }
+
+    tamanho_imagem (entradappm, &largura_imagem, &altura_imagem);
+    imputppm = inicializa_imagem (largura_imagem, altura_imagem);
+
+    //rewind (entradappm);
+    fclose(entradappm);
+
+    ler_imagem (imputppm, nome_entrada);
+
+    if (imputppm->tipo == 0)
+        fprintf (stderr, "Imput imagem is PPM P6, %dx%d pixels\n", imputppm->largura, imputppm->altura);
+    else
+        fprintf (stderr, "Imput imagem is PPM P3, %dx%d pixels\n", imputppm->largura, imputppm->altura);
+
+    fprintf (stderr, "Building mosaic imagem\n");
+    outputppm = inicializa_imagem (largura_imagem, altura_imagem);
+    fotomosaico (vetor, imputppm, outputppm, cor_media_bloco);
     
-    //imprimir_pastilhas (vetor);
+    fprintf (stderr, "Writing output file\n");
+    escrever_imagem (outputppm, nome_saida);
+    
+    
+    //imprimir_pastilhas (vetor, cor_media_bloco);
+
+
 
     fprintf (stderr, "Fechando o diretorio %s\n", nome_diretorio);
     (void)closedir(diretorio);
+    
+    free (cor_media_bloco);
+    free (imputppm->matrix[0]);
+    free (imputppm->matrix);
+    free (imputppm->nome_arquivo);
+    free (imputppm);
+
+    free (outputppm->matrix[0]);
+    free (outputppm->matrix);
+    free (outputppm->nome_arquivo);
+    free (outputppm);
+
+    for (int i = 0; i < vetor->tam; i++) {
+        free (vetor->vetor[i].imagem->nome_arquivo);
+        free (vetor->vetor[i].imagem->matrix[0]);
+        free (vetor->vetor[i].imagem->matrix);
+        free (vetor->vetor[i].imagem);
+    }
+    free (vetor->vetor);
+    free (vetor);
+
     return 0;
 }
