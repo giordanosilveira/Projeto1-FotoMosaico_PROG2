@@ -244,6 +244,12 @@ void ler_imagem (t_ppm *imagem, char * nome_arquivo) {
         exit (1);
     }                                                                //Fim do bloco
 
+    if (imagem->componente_rgb != 255) {
+        perror ("Error");
+        fprintf (stderr, "Componente RGB: %d diferente de 255\n", imagem->componente_rgb);
+        exit (1);
+    }
+    
     //Bloco: aloca a matriz de pixel na memória e carrega os pixels na memória
     carrega_pixels (arquivo, imagem->matrix, imagem->tipo, imagem->largura, imagem->altura);                                             
                                                                      //Fim do bloco
@@ -474,3 +480,18 @@ void escrever_imagem (t_ppm *outputppm, char *name_output, int teste) {
     fclose (arquivo);
 
 }
+/*void imprimir_pastilhas (t_vetor_pastilhas *ptr) {
+
+    FILE * arquivo;
+    arquivo = fopen ("teste.txt", "w");
+    if (! arquivo) {
+        perror ("Error");
+        exit (1);
+    }
+
+    for (int i = 0; i < ptr->tam; i++) {
+        fprintf (arquivo, "%d\n", ptr->vetor[i].imagem->componente_rgb);
+    }
+
+    fclose (arquivo);
+}*/

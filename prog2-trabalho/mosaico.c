@@ -108,6 +108,7 @@ int main (int argc, char *argv[]) {
 
     rewinddir (diretorio);  //Move o ponteiro para o início do diretório
 
+    fprintf (stderr, "Open tiles\n");
     //Abre todas as pastilhas e carregas elas na memória
     vetor = abrir_pastilhas (diretorio, file_directory, nome_diretorio, past_lar, past_alt);
 
