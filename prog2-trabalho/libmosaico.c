@@ -472,6 +472,7 @@ void escrever_imagem (t_ppm *outputppm, char *name_output, int teste) {
                 fprintf (arquivo,"%d ", outputppm->matrix[i][j].verde);
                 fprintf (arquivo,"%d ", outputppm->matrix[i][j].azul);
             }
+            //fprintf (arquivo,"\n");
         }
     }
 
